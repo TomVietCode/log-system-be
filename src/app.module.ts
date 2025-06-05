@@ -15,8 +15,5 @@ import { AuthModule } from './auth/auth.module';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) { 
     consumer
-      .apply(LoggerMiddleware)
-      .exclude({ path: "messages", method: RequestMethod.GET })
-      .forRoutes("*")
   }
 }

@@ -44,7 +44,7 @@ export class AuthService {
       });
 
       const accessToken = this.jwtService.sign({
-        id: user.id,
+        sub: user.id,
         role: user.role,
       })
 
@@ -71,7 +71,7 @@ export class AuthService {
       }
 
       const accessToken = this.jwtService.sign({
-        id: user.id,
+        sub: user.id,
         role: user.role,
       })
 
