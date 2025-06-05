@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional, IsDate, IsPhoneNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
 
-export class UpdateUserDTO {
+export class UpdateUserDto {
   @IsString()
   @IsOptional()
   fullName?: string;
@@ -9,10 +9,6 @@ export class UpdateUserDTO {
   @IsOptional()
   @IsEmail({}, { message: 'Email is not valid' })
   email?: string;
-
-  @IsString()
-  @IsOptional()
-  password?: string;  
 
   @IsString()
   @IsOptional()
@@ -28,10 +24,7 @@ export class UpdateUserDTO {
 
   @IsString()
   @IsOptional()
-  role?: string;
-
-  @IsString()
-  @IsOptional()
+  @IsEmail({}, { message: 'Personal email is not valid' })
   personalEmail?: string;
 
   @IsString()
@@ -41,9 +34,15 @@ export class UpdateUserDTO {
   @IsString()
   @IsOptional()
   accountNumber?: string;
+}
+
+export class ChangePasswordDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Old password is required' })
+  oldPassword: string;
 
   @IsString()
-  @IsOptional()
-  employeeCode?: string;
+  @IsNotEmpty({ message: 'New password is required' })
+  newPassword: string;
 }
 

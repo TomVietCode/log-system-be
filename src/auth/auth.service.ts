@@ -4,7 +4,7 @@ import { LoginDTO, RegisterDTO, UserRole } from "./dtos";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from 'bcrypt';
 import { v7 } from 'uuid';
-import { generateEmployeeCode } from "src/helper/generate";
+import { generateEmployeeCode } from "../helper/generate";
 
 @Injectable()
 export class AuthService {
