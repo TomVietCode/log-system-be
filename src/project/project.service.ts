@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProjectDto } from './dtos';
+import { CreateProjectDto, createTaskDto, UpdateTaskDto } from './dtos';
 import { v7 } from 'uuid';
 
 @Injectable()
@@ -44,6 +44,21 @@ export class ProjectService {
     return { ...project, members }
   }
 
+  async getProjects(userId: string) {
+
+    const projects = await this.prisma.project.findMany({
+      where: {
+        ProjectMembers: {
+          some: {
+            userId
+          }
+        }
+      },
+    })
+
+    return projects
+  }
+
   async addMemberToProject(projectId: string, memberIds: string[]) {
     // Check if project exists
     const project = await this.prisma.project.findUnique({
@@ -76,5 +91,57 @@ export class ProjectService {
     })
 
     return { success: true }
+  }
+
+  async createProjectTask(dto: createTaskDto) {
+    const { name, projectId } = dto
+
+    // Check if project exists
+    const project = await this.prisma.project.findUnique({ where: { id: projectId } })
+    if (!project) {
+      throw new NotFoundException('Project not found')
+    }
+    
+    // Check if task name is exists
+    const existingTask = await this.prisma.task.findFirst({
+      where: { name, projectId }
+    })
+
+    if (existingTask) {
+      throw new BadRequestException('Task with this name already exists')
+    }
+
+    // Create task
+    const taskId = v7()
+    const task = await this.prisma.task.create({
+      data: {
+        id: taskId,
+        projectId,
+        name,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    })  
+
+    return task
+  }
+
+  async getProjectTasks(projectId: string) {
+    const tasks = await this.prisma.task.findMany({
+      where: { projectId }
+    })
+    
+    return tasks
+  }
+
+  async updateTask(taskId: string, dto: UpdateTaskDto) {
+    const { name } = dto
+
+    const task = await this.prisma.task.update({
+      where: { id: taskId },
+      data: { name, updatedAt: new Date() } 
+    })
+
+    return task
   }
 }

@@ -26,3 +26,18 @@ export class AddMemberToProjectDto {
   userIds: string[];
 }
 
+export class createTaskDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Task name is required' })
+  name: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Project ID is required' })
+  projectId: string;
+}
+
+export class UpdateTaskDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Task name is required' })
+  name: string;
+}
