@@ -6,12 +6,14 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 enum Role {
-  ADMIN 
+  ADMIN
   LEADER
   HCNS
   DEV
 }
+
 //User
 model User {
   id            String    @id @default(uuid())
@@ -27,16 +29,18 @@ model User {
   liscenePlate  String?   @map("liscence_plate") @db.VarChar(20)
   role          Role      @default(DEV) @map("role")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  DevLog        DevLog[]
+  ProjectMembers ProjectMembers[]
 
   @@map("users")
 }
 
 // WhiteList Email 
 model WhiteListEmail {
-  id String @id @default(uuid())
-  email String @db.VarChar(255)
+  id        String   @id @default(uuid())
+  email     String   @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -45,37 +49,56 @@ model WhiteListEmail {
 
 // Project
 model Project {
-  id String @id @default(uuid())
-  name String @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String          @id @default(uuid())
+  name          String          @db.VarChar(255)
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  tasks         Task[]
+  DevLog        DevLog[]
+  ProjectMembers ProjectMembers[]
 
   @@map("projects")
-  tasks Task[]
-  DevLog DevLog[]
+}
+
+model ProjectMembers {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+  @@map("project_members")
 }
 
 // Task
 model Task {
-  id String @id @default(uuid())
-  name String @db.VarChar(255)
-  project Project @relation(fields: [projectId], references: [id])
-  projectId String
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(255)
+  projectId String   @map("project_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
+
+  project Project @relation(fields: [projectId], references: [id])
+
   @@map("tasks")
 }
 
 // DevLog
 model DevLog {
-  id String @id @default(uuid())
-  project Project @relation(fields: [projectId], references: [id])
-  projectId String
-  userId String
-  content String @db.VarChar(255)
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  content   String   @db.VarChar(255)
+  logDate   DateTime @default(now()) @map("log_date")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
 
   @@map("dev_logs")
 }

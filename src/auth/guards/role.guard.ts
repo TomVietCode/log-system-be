@@ -1,7 +1,8 @@
-import { CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { ROLE_KEY } from "../decorators/role.decorator";
 
+@Injectable()
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
@@ -16,10 +17,12 @@ export class RoleGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const user = request.user
     if (!user) throw new ForbiddenException("User not found")
+    //log include path where this log coming from
 
-    const hasRole = () => user.roles.some((role) => requiredRoles.includes(role))
+    console.log(`(role.guard) User role: ${user.role}, Required roles: ${requiredRoles}`)
+    const hasRole = requiredRoles.includes(user.role)
     if (!hasRole) {
-      throw new ForbiddenException("You are not authorized to access this resource")
+      throw new ForbiddenException("Unauthorized")
     }
     
     return true
