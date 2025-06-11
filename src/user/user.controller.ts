@@ -13,7 +13,10 @@ export class UserController {
 
   @Get("profile")
   async getProfile(@User("id") userId: string) {
-    return this.userService.getProfile(userId)
+    const result = await this.userService.getProfile(userId)
+    return {
+      data: result,
+    }
   }
 
   @Patch("profile")
@@ -22,7 +25,10 @@ export class UserController {
     if (!result) {
       return { message: "Failed to update profile" }
     }
-    return { message: "Profile updated successfully" }
+    return {
+      data: result,
+      message: "Profile updated successfully"
+    }
   }  
 
   @Patch("change-password")
@@ -31,6 +37,9 @@ export class UserController {
     if (!result) {
       return { message: "Failed to change password" }
     }
-    return { message: "Password changed successfully" }
+    return { 
+      data: result,
+      message: "Password changed successfully"
+    }
   }
 }

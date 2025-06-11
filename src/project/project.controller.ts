@@ -21,7 +21,9 @@ export class ProjectController {
   async createProject(@Body() dto: CreateProjectDto) {
     const result = await this.projectService.createProject(dto)
      
-    return result
+    return {
+      data: result
+    }
   }
 
   @Get()
@@ -29,7 +31,9 @@ export class ProjectController {
   async getProjects(@User() user: any) {
     const result = await this.projectService.getProjects(user.id)
 
-    return result
+    return {
+      data: result,
+    }
   }
 
   @Post('add-member')
@@ -37,7 +41,9 @@ export class ProjectController {
   async addMemberToProject(@Body() dto: AddMemberToProjectDto) {
     const result = await this.projectService.addMemberToProject(dto.projectId, dto.userIds)
 
-    return result
+    return {
+      data: result,
+    }
   }
 
   @Post('tasks')
@@ -45,7 +51,9 @@ export class ProjectController {
   async createProjectTask(@Body() dto: createTaskDto) {
     const result = await this.projectService.createProjectTask(dto)
 
-    return result
+    return {  
+      data: result,
+    }
   }
 
   @Get(':projectId/tasks')
@@ -53,7 +61,9 @@ export class ProjectController {
   async getProjectTasks(@Param('projectId') projectId: string) {
     const result = await this.projectService.getProjectTasks(projectId)
 
-    return result
+    return {
+      data: result,
+    }
   }
 
   @Patch('tasks/:taskId')
@@ -64,7 +74,9 @@ export class ProjectController {
   ) {
     const result = await this.projectService.updateTask(taskId, dto) 
 
-    return result
+    return {
+      data: result,
+    }
   }
 }
 

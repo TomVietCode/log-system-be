@@ -48,7 +48,8 @@ export class AuthService {
         role: user.role,
       })
 
-      return { accessToken, user };
+      return { accessToken };
+
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -75,7 +76,7 @@ export class AuthService {
         role: user.role,
       })
 
-      return { accessToken, user };
+      return { accessToken };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
