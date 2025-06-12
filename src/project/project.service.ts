@@ -45,7 +45,6 @@ export class ProjectService {
   }
 
   async getProjects(userId: string) {
-
     const projects = await this.prisma.project.findMany({
       where: {
         ProjectMembers: {
@@ -54,6 +53,21 @@ export class ProjectService {
           }
         }
       },
+      select: {
+        id: true,
+        name: true,
+        tasks: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
+        ProjectMembers: {
+          select: { 
+            id: true,
+          }
+        }
+      }
     })
 
     return projects

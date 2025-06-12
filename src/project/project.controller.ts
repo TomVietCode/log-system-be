@@ -6,8 +6,8 @@ import { JWTAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RoleGuard } from '../auth/guards/role.guard';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserRole } from 'src/auth/dtos';
-import { userInfo } from 'os';
-import { User } from 'src/auth/decorators/user.decorator';
+import { UserDecorator } from 'src/auth/decorators/user.decorator';
+import { User } from 'src/user/dtos';
 
 @Controller('projects')
 @UseGuards(JWTAuthGuard, RoleGuard)
@@ -28,7 +28,7 @@ export class ProjectController {
 
   @Get()
   @Roles(UserRole.LEADER, UserRole.DEV)
-  async getProjects(@User() user: any) {
+  async getProjects(@UserDecorator() user: User) {
     const result = await this.projectService.getProjects(user.id)
 
     return {

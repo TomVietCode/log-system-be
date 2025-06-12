@@ -105,6 +105,5 @@ model DevLog {
   user    User    @relation(fields: [userId], references: [id])
   task    Task    @relation(fields: [taskId], references: [id])
 
-  @@unique([projectId, userId, logDate])
   @@map("dev_logs")
-}
+} 

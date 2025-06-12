@@ -1,4 +1,22 @@
 import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
+import { UserRole } from 'src/auth/dtos';
+
+export interface User {
+  id: string
+  employeeCode: string
+  fullName: string
+  dob?: Date | null
+  accountNumber?: string | null
+  email: string
+  phone: string
+  citizenID: string
+  personalEmail?: string
+  liscenePlate?: string | null
+  role: UserRole
+  createdAt?: Date
+  updatedAt?: Date
+}
+
 
 export class UpdateUserDto {
   @IsString()

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JWTAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { User } from '../auth/decorators/user.decorator';
+import { UserDecorator } from '../auth/decorators/user.decorator';
 import { ChangePasswordDto, UpdateUserDto } from './dtos';
 
 @Controller('users')
@@ -12,7 +12,7 @@ export class UserController {
   ) {}
 
   @Get("profile")
-  async getProfile(@User("id") userId: string) {
+  async getProfile(@UserDecorator("id") userId: string) {
     const result = await this.userService.getProfile(userId)
     return {
       data: result,
@@ -20,7 +20,7 @@ export class UserController {
   }
 
   @Patch("profile")
-  async updateProfile(@User("id") userId: string, @Body() dto: UpdateUserDto) {
+  async updateProfile(@UserDecorator("id") userId: string, @Body() dto: UpdateUserDto) {
     const result = await this.userService.updateProfile(userId, dto)
     if (!result) {
       return { message: "Failed to update profile" }
@@ -32,7 +32,7 @@ export class UserController {
   }  
 
   @Patch("change-password")
-  async changePassword(@User("id") userId: string, @Body() dto: ChangePasswordDto) {
+  async changePassword(@UserDecorator("id") userId: string, @Body() dto: ChangePasswordDto) {
     const result = await this.userService.changePassword(userId, dto)
     if (!result) {
       return { message: "Failed to change password" }
