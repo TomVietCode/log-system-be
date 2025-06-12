@@ -7,3 +7,14 @@ export const getDateRange = (month: number, year: number) => {
     endDate
   }
 }
+
+export const getDayRange = (date: string) => {
+  const targetDate = new Date(date)
+  const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0))
+  const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999))
+
+  return {
+    startOfDay,
+    endOfDay
+  }
+}

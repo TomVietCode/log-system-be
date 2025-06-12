@@ -18,8 +18,8 @@ export class ProjectController {
 
   @Post("/")
   @Roles(UserRole.LEADER)
-  async createProject(@Body() dto: CreateProjectDto) {
-    const result = await this.projectService.createProject(dto)
+  async createProject(@UserDecorator("id") userId: string, @Body() dto: CreateProjectDto) {
+    const result = await this.projectService.createProject(userId, dto)
      
     return {
       data: result

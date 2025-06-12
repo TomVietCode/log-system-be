@@ -1,6 +1,8 @@
-import { v7 } from 'uuid';
-
 export const generateEmployeeCode = (length: number) => {
-  const id = v7();
-  return id.slice(0, length);
+  const nums = "0123456789"
+  let result = ""
+  for(let i = 0; i < length; i++) {
+    result += nums[Math.floor(Math.random() * nums.length)]
+  }
+  return result
 }

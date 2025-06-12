@@ -9,13 +9,17 @@ export class ProjectService {
     private readonly prisma: PrismaService
   ) {}
 
-  async createProject(dto: CreateProjectDto) {
+  async createProject(userId: string,dto: CreateProjectDto) {
     const existingProject = await this.prisma.project.findFirst({
       where: { name: dto.name }
     })
 
     if (existingProject) {
       throw new BadRequestException('Project with this name already exists')
+    }
+
+    if(dto.memberIds.length === 0) {
+      dto.memberIds.push(userId)
     }
 
     const projectId = v7()

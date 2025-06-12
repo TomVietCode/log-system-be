@@ -2,8 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateDevLogDto } from './dtos';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { v7 } from 'uuid';
-import { getDateRange } from 'src/helper/date';
+import { getDateRange, getDayRange } from 'src/helper/date';
 import { User } from 'src/user/dtos';
+import { UserRole } from 'src/auth/dtos';
 
 @Injectable()
 export class DevlogService {
@@ -150,6 +151,66 @@ export class DevlogService {
       tasks: tasksResponse,
       totalByDay,
       grandTotal
+    }
+  }
+
+  async getDevWithoutLogs(user: User, date: string) {
+    const projects = await this.prisma.projectMembers.findMany({
+      where: {
+        userId: user.id
+      },
+      select: {
+        projectId: true
+      }
+    })
+
+    const projectIds = projects.map(project => project.projectId)
+
+    const projectMembers = await this.prisma.projectMembers.findMany({
+      where: {
+        projectId: { in: projectIds },
+      },
+      select: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            employeeCode: true,
+            role: true
+          }
+        }
+      },
+      distinct: ["userId"]
+    })
+
+    const { startOfDay, endOfDay } = getDayRange(date)
+
+    const devWithLogs = await this.prisma.devLog.findMany({
+      where: {
+        logDate: {
+          gte: startOfDay,
+          lte: endOfDay
+        },
+        user: {
+          role: UserRole.DEV
+        }
+      },
+      select: {
+        userId: true
+      },
+      distinct: ["userId"]
+    })
+
+    const devWithLogIds = devWithLogs.map(dev => dev.userId)
+
+    const devWithoutLogs = projectMembers
+      .filter(dev => !devWithLogIds.includes(dev.user.id) && dev.user.role === UserRole.DEV)
+      .map(member => member.user)
+
+    return {
+      totalDevWithoutLogs: devWithoutLogs.length,
+      date,
+      devs: devWithoutLogs
     }
   }
 }
