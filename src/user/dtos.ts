@@ -64,3 +64,13 @@ export class ChangePasswordDto {
   newPassword: string;
 }
 
+// dto update user for admin only
+export class UpdateUserAdminDto {
+  @IsString()
+  @IsOptional()
+  role?: UserRole
+
+  @IsString()
+  @IsOptional()
+  password?: string
+}

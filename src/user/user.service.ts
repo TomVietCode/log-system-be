@@ -1,11 +1,56 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChangePasswordDto, UpdateUserDto } from './dtos';
+import { ChangePasswordDto, UpdateUserAdminDto, UpdateUserDto } from './dtos';
 import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getUserList(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit
+
+    const users = await this.prisma.user.findMany({
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: "desc"
+      },
+      select: {
+        id: true,
+        employeeCode: true,
+        fullName: true,
+        role: true,
+        email: true,
+      }
+    })
+
+    return users
+  }
+
+  async updateUser(userId: string, dto: UpdateUserAdminDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      omit: { password: true }
+    })
+
+    if(!user) {
+      throw new NotFoundException("User not found")
+    }
+    
+    if(dto.password && dto.password.length > 0) {
+      dto.password = await bcrypt.hash(dto.password, 10)
+    } else {
+      delete dto.password
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId},
+      data: dto
+    })
+
+    return true
+  }
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
