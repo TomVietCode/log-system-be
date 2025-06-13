@@ -90,8 +90,8 @@ model Task {
 // DevLog
 model DevLog {
   id         String   @id @default(uuid())
-  projectId  String   @map("project_id")
   userId     String   @map("user_id")
+  projectId  String   @map("project_id")
   taskId     String   @map("task_id")
   totalHour  Int      @default(0) @map("total_hour")
   content    String   @db.VarChar(255)

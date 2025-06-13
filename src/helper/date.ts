@@ -1,10 +1,16 @@
-export const getDateRange = (month: number, year: number) => {
-  const startDate = new Date(year, month - 1, 1)
-  const endDate = new Date(year, month, 0)
+export const getDateRange = (month?: number, year?: number) => {
+  month = month || new Date().getMonth() + 1;
+  year = year || new Date().getFullYear();
+  
+  // Tạo ngày với UTC
+  const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+  const endDate = new Date(Date.UTC(year, month, 0));
 
   return {
     startDate,
-    endDate
+    endDate,
+    currentMonth: month,
+    currentYear: year
   }
 }
 

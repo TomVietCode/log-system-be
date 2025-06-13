@@ -41,6 +41,7 @@ export class DevlogService {
       data: {
         id: newId,
         taskId,
+        projectId: task.projectId,
         totalHour,
         isOvertime,
         content: content || '',
@@ -54,8 +55,9 @@ export class DevlogService {
     return devLog
   }
 
-  async getMyDevLogs(user: User, month: number, year: number) {
-    const { startDate, endDate } = getDateRange(month, year)
+  async getMyDevLogs(user: User, month?: number, year?: number) {
+    const { startDate, endDate, currentMonth, currentYear } = getDateRange(month, year)
+
     // get all project id that user is member of
     const joinedProjects = await this.prisma.projectMembers.findMany({
       where: {
@@ -66,7 +68,7 @@ export class DevlogService {
       }
     })
     const projectIds = joinedProjects.map(project => project.projectId)
-
+    
     // Get all tasks of all projects
     const tasks = await this.prisma.task.findMany({
       where: {
@@ -79,14 +81,16 @@ export class DevlogService {
       }
     })
     const taskIds = tasks.map(task => task.id)
-
+    
     if(projectIds.length === 0 || taskIds.length === 0) {
       return {
+        userName: user.fullName,
+        month,
+        year,
         days: [],
         tasks: [],
         totalByDay: [],
-        totalByTask: [],
-        grandTotal: []
+        grandTotal: 0
       }
     }
 
@@ -96,7 +100,8 @@ export class DevlogService {
     //get all devlogs
     const devLogs = await this.prisma.devLog.findMany({
       where: {
-        taskId: { in: taskIds},
+        userId: user.id,
+        taskId: { in: taskIds },
         logDate: {
           gte: startDate,
           lte: endDate
@@ -145,15 +150,15 @@ export class DevlogService {
 
     return {
       userName: user.fullName,
-      month,
-      year,
+      month: currentMonth,
+      year: currentYear,
       days,
       tasks: tasksResponse,
       totalByDay,
       grandTotal
     }
   }
-
+  
   async getDevWithoutLogs(user: User, date: string) {
     const projects = await this.prisma.projectMembers.findMany({
       where: {
@@ -212,5 +217,67 @@ export class DevlogService {
       date,
       devs: devWithoutLogs
     }
+  }
+
+  async getUserDevLogs(requester: User, userId: string, month: number, year: number) {
+    const { role, id: requesterId } = requester
+
+    if(role === UserRole.LEADER) {
+      const projects = await this.prisma.projectMembers.findMany({
+        where: {
+          userId: requesterId
+        },
+        select: {
+          projectId: true
+        }
+      })
+
+      const projectIds = projects.map(project => project.projectId)
+
+      const memberInProject = await this.prisma.projectMembers.findFirst({
+        where: {
+          projectId: { in: projectIds },
+          userId: userId
+        },
+        select: {
+          user: {
+            omit: { password: true }
+          }
+        },
+      })
+
+      if(!memberInProject) {
+        throw new BadRequestException('User is not a member of any project')
+      }
+      const { role, ...props } = memberInProject.user
+
+      const memberInfo: User = {
+        ...props, 
+        role: role as UserRole
+      }
+
+      const devLogData = await this.getMyDevLogs(memberInfo, month, year)
+
+      return devLogData
+    }
+
+    const userRecord = await this.prisma.user.findUnique({
+      where: {
+        id: userId
+      },
+      omit: { password: true }
+    })
+
+    if(!userRecord) {
+      throw new BadRequestException('User not found')
+    }
+
+    const user: User = {
+      ...userRecord,
+      role: userRecord.role as UserRole
+    }
+
+    const devLogData = await this.getMyDevLogs(user, month, year)
+    return devLogData
   }
 }

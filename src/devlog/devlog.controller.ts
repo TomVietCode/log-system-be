@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { UserDecorator } from 'src/auth/decorators/user.decorator';
 import { CreateDevLogDto } from './dtos';
 import { DevlogService } from './devlog.service';
@@ -32,13 +32,25 @@ export class DevlogController {
       data: result
     }
   }
-
+  
   @Get('/missing')
   @UseGuards(RoleGuard)
   @Roles(UserRole.LEADER)
   async getDevWithoutLogs(@UserDecorator() user: User, @Query("date") date: string) {
     const result = await this.devlogService.getDevWithoutLogs(user, date)
 
+    return {
+      data: result
+    }
+  }
+
+  @Get(":userId")
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.HCNS, UserRole.LEADER)
+  async getUserDevLogs(@UserDecorator() requester: User, @Param("userId") userId: string, @Query("month") month: number, @Query("year") year: number) {
+
+    const result = await this.devlogService.getUserDevLogs(requester, userId, month, year)
+    
     return {
       data: result
     }

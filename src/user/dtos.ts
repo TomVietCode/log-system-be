@@ -17,7 +17,6 @@ export interface User {
   updatedAt?: Date
 }
 
-
 export class UpdateUserDto {
   @IsString()
   @IsOptional()
