@@ -219,6 +219,12 @@ export class DevlogService {
     }
   }
 
+  async exportDevLogs(requester: User, userId: string, month: number, year: number) {
+    const data = await this.getUserDevLogs(requester, userId, month, year)
+    
+    return data
+  }
+
   async getUserDevLogs(requester: User, userId: string, month: number, year: number) {
     const { role, id: requesterId } = requester
 
