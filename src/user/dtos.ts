@@ -11,7 +11,7 @@ export interface User {
   phone: string
   citizenID: string
   personalEmail?: string
-  liscenePlate?: string | null
+  licensePlate?: string | null
   role: UserRole
   createdAt?: Date
   updatedAt?: Date
@@ -37,7 +37,7 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
-  liscencePlate?: string;
+  licensePlate?: string;
 
   @IsString()
   @IsOptional()

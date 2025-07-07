@@ -74,12 +74,11 @@ export class UserService {
       throw new NotFoundException("User not found")
     }
 
-    //find existing email or personal email
+    //find existing email or personal email that different from current user
     const existingEmail = await this.prisma.user.findFirst({
       where: {
         OR: [
-          { email: dto.email },
-          { personalEmail: dto.personalEmail }
+          { personalEmail: dto.personalEmail, id: { not: userId } }
         ]
       }
     })

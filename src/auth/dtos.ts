@@ -66,7 +66,7 @@ export class UpdateUserDTO {
 
   @IsString()
   @IsOptional()
-  liscencePlate?: string;
+  licensePlate?: string;
 
   @IsString()
   @IsOptional()

@@ -26,18 +26,7 @@ export class UserController {
       data: result
     }
   }
-
-  @Patch(":userId")
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN)
-  async updateUser(@Param("userId") userId: string, @Body() dto: UpdateUserAdminDto) {
-    const result = await this.userService.updateUser(userId, dto)
-    
-    return {
-      data: result
-    }
-  }
-
+  
   @Get("profile")
   async getProfile(@UserDecorator("id") userId: string) {
     const result = await this.userService.getProfile(userId)
@@ -45,7 +34,7 @@ export class UserController {
       data: result,
     }
   }
-
+  
   @Patch("profile")
   async updateProfile(@UserDecorator("id") userId: string, @Body() dto: UpdateUserDto) {
     const result = await this.userService.updateProfile(userId, dto)
@@ -67,6 +56,17 @@ export class UserController {
     return { 
       data: result,
       message: "Password changed successfully"
+    }
+  }
+
+  @Patch(":userId")
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN)
+  async updateUser(@Param("userId") userId: string, @Body() dto: UpdateUserAdminDto) {
+    const result = await this.userService.updateUser(userId, dto)
+    
+    return {
+      data: result
     }
   }
 }

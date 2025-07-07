@@ -7,28 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  LEADER
-  HCNS
-  DEV
-}
-
-//User
 model User {
-  id            String    @id @default(uuid())
-  employeeCode  String    @map("employee_code") @db.VarChar(5)
-  fullName      String    @map("full_name") @db.VarChar(255)
-  dob           DateTime? @db.Date()
-  accountNumber String?   @map("account_number") @db.VarChar(50)
-  email         String    @db.VarChar(255)
-  password      String    @db.VarChar(255)
-  phone         String    @db.VarChar(11)
-  citizenID     String    @map("citizen_id") @db.VarChar(50)
-  personalEmail String    @map("personal_email") @db.VarChar(255)
-  liscenePlate  String?   @map("liscence_plate") @db.VarChar(20)
-  role          Role      @default(DEV) @map("role")
-
+  id             String           @id @default(uuid())
+  employeeCode   String           @map("employee_code") @db.VarChar(5)
+  fullName       String           @map("full_name") @db.VarChar(255)
+  dob            DateTime?        @db.Date
+  accountNumber  String?          @map("account_number") @db.VarChar(50)
+  email          String           @db.VarChar(255)
+  password       String           @db.VarChar(255)
+  phone          String           @db.VarChar(11)
+  citizenID      String           @map("citizen_id") @db.VarChar(50)
+  personalEmail  String           @map("personal_email") @db.VarChar(255)
+  licensePlate   String?          @map("license_plate") @db.VarChar(20)
+  role           Role             @default(DEV) @map("role")
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   DevLog         DevLog[]
@@ -37,7 +28,6 @@ model User {
   @@map("users")
 }
 
-// WhiteList Email 
 model WhiteListEmail {
   id        String   @id @default(uuid())
   email     String   @db.VarChar(255)
@@ -47,15 +37,14 @@ model WhiteListEmail {
   @@map("white_list_emails")
 }
 
-// Project
 model Project {
   id             String           @id @default(uuid())
   name           String           @db.VarChar(255)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
-  tasks          Task[]
   DevLog         DevLog[]
   ProjectMembers ProjectMembers[]
+  tasks          Task[]
 
   @@map("projects")
 }
@@ -65,29 +54,27 @@ model ProjectMembers {
   projectId String   @map("project_id")
   userId    String   @map("user_id")
   joinedAt  DateTime @default(now()) @map("joined_at")
-
-  project Project @relation(fields: [projectId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([projectId, userId])
+  @@index([userId], map: "project_members_user_id_fkey")
   @@map("project_members")
 }
 
-// Task
 model Task {
   id        String   @id @default(uuid())
   name      String   @db.VarChar(255)
   projectId String   @map("project_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  devLogs   DevLog[]
+  project   Project  @relation(fields: [projectId], references: [id])
 
-  project Project  @relation(fields: [projectId], references: [id])
-  devLogs DevLog[]
-
+  @@index([projectId], map: "tasks_project_id_fkey")
   @@map("tasks")
 }
 
-// DevLog
 model DevLog {
   id         String   @id @default(uuid())
   userId     String   @map("user_id")
@@ -97,13 +84,21 @@ model DevLog {
   content    String   @db.VarChar(255)
   logDate    DateTime @default(now()) @map("log_date")
   isOvertime Boolean  @default(false) @map("is_overtime")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  project    Project  @relation(fields: [projectId], references: [id])
+  task       Task     @relation(fields: [taskId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  project Project @relation(fields: [projectId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
-  task    Task    @relation(fields: [taskId], references: [id])
-
+  @@index([projectId], map: "dev_logs_project_id_fkey")
+  @@index([taskId], map: "dev_logs_task_id_fkey")
+  @@index([userId], map: "dev_logs_user_id_fkey")
   @@map("dev_logs")
-} 
+}
+
+enum Role {
+  ADMIN
+  LEADER
+  HCNS
+  DEV
+}

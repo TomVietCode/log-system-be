@@ -8,10 +8,16 @@ export class PrismaService extends PrismaClient {
   }
   
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+      console.log("Connected to database");
+    } catch (error) {
+      console.error("Error connecting to database", error);
+    }
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
+    console.log("Disconnected from database");
   }
 }
