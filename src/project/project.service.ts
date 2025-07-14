@@ -1,6 +1,6 @@
 import { BadRequestException, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProjectDto, createTaskDto, UpdateTaskDto } from './dtos';
+import { CreateProjectDto, createTaskDto, Task, UpdateProjectDto, UpdateTaskDto } from './dtos';
 import { v7 } from 'uuid';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class ProjectService {
     private readonly prisma: PrismaService
   ) {}
 
-  async createProject(userId: string,dto: CreateProjectDto) {
+  async createProject(userId: string, dto: CreateProjectDto) {
     const existingProject = await this.prisma.project.findFirst({
       where: { name: dto.name }
     })
@@ -18,13 +18,11 @@ export class ProjectService {
       throw new BadRequestException('Project with this name already exists')
     }
 
-    if(dto.memberIds.length === 0) {
-      dto.memberIds.push(userId)
-    }
+    dto.memberIds.push(userId)
 
     const projectId = v7()
     const project = await this.prisma.project.create({
-      data: { id: projectId, name: dto.name }
+      data: { id: projectId, name: dto.name, description: dto.description }
     })
 
     if (dto.memberIds && dto.memberIds.length > 0) {
@@ -45,6 +43,10 @@ export class ProjectService {
         userId: true
       }
     })
+
+    const projectTask = dto.tasks.map(name => ({ id: v7(), projectId, name }))
+    await this.prisma.task.createMany({ data: projectTask })
+    
     return { ...project, members }
   }
 
@@ -60,20 +62,18 @@ export class ProjectService {
       select: {
         id: true,
         name: true,
-        tasks: {
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
           select: {
-            id: true,
-            name: true,
-          }
+            tasks: true,
+            ProjectMembers: true
+          } 
         },
-        ProjectMembers: {
-          select: { 
-            id: true,
-          }
-        }
       }
     })
-
+    console.log(userId)
     return projects
   }
 
@@ -150,6 +150,127 @@ export class ProjectService {
     })
     
     return tasks
+  }
+
+  async getProject(projectId: string) {
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        tasks: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        ProjectMembers: {
+          select: {
+            userId: true
+          }
+        }
+      }
+    })
+
+    return project
+  }
+
+  async updateTasks(projectId: string, tasks: Task[]) {
+    const currentTasks = await this.prisma.task.findMany({
+      where: { projectId }
+    })
+    const existingTasks = tasks.filter(task => task.id)
+    const existingTaskIds = existingTasks.map(task => task.id)
+    const newTasks = tasks.filter(task => !task.id)
+
+    // Delete tasks that are no longer in the list
+    if(existingTaskIds.length > 0) {
+      await this.prisma.task.deleteMany({
+        where: { projectId, id: { notIn: existingTaskIds } }
+      })
+    } else {
+      await this.prisma.task.deleteMany({
+        where: { projectId }
+      })
+    }
+
+
+    for(const task of existingTasks) {
+      const currentTask = currentTasks.find(t => t.id === task.id)
+      if(currentTask!.name !== task.name) {
+        await this.prisma.task.update({
+          where: { id: task.id },
+          data: {
+            name: task.name,
+            updatedAt: new Date()
+          }
+        })
+      }
+    }
+
+    const newTaskData = newTasks.map(task => ({
+      id: v7(),
+      name: task.name,
+      projectId,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }))
+
+    if(newTaskData.length > 0) {
+      await this.prisma.task.createMany({
+        data: newTaskData
+      })
+    }
+
+    return true
+  }
+
+  async updateProject(projectId: string, userId: string, dto: UpdateProjectDto) {
+    const { name, description, memberIds, tasks } = dto
+    
+    await this.prisma.project.update({
+      where: { id: projectId },
+      data: {
+        name,
+        description
+      }
+    })
+
+    // Update member in project
+    if (memberIds && memberIds.length > 0) {
+      const currentMembers = await this.prisma.projectMembers.findMany({
+        where: { projectId, userId: { not: userId } }
+      })
+
+      const currentMemberIds = currentMembers.map(member => member.userId)
+      const membersToRemove = currentMemberIds.filter(id => !memberIds.includes(id))
+      const membersToAdd = memberIds.filter(id => !currentMemberIds.includes(id))
+
+      if (membersToRemove.length > 0) {
+        await this.prisma.projectMembers.deleteMany({
+          where: {
+            projectId,
+            userId: { in: membersToRemove }
+          }
+        })
+      }
+
+      if (membersToAdd.length > 0) {
+        await this.prisma.projectMembers.createMany({
+          data: membersToAdd.map(userId => ({
+            id: v7(),
+            projectId,
+            userId,
+            joinedAt: new Date()
+          }))
+        })
+      }
+    }
+
+    await this.updateTasks(projectId, tasks)
+
+    return true
   }
 
   async updateTask(taskId: string, dto: UpdateTaskDto) {

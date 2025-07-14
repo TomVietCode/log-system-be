@@ -2,15 +2,21 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { ChangePasswordDto, UpdateUserAdminDto, UpdateUserDto } from './dtos';
 import * as bcrypt from 'bcrypt'
+import { UserRole } from 'src/auth/dtos';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUserList(page: number = 1, limit: number = 10) {
+  async getUserList(page: number = 1, limit: number = 10, role: string = "all") {
     const skip = (page - 1) * limit
+    
+    const where = role === "all" 
+      ? {} 
+      : { role: role as UserRole }
 
     const users = await this.prisma.user.findMany({
+      where,
       skip,
       take: limit,
       orderBy: {
@@ -86,7 +92,7 @@ export class UserService {
     if (existingEmail) {
       throw new BadRequestException("Email or personal email already exists")
     }
-
+    
     //update user
     await this.prisma.user.update({
       where: { id: userId },

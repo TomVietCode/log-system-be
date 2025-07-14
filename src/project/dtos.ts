@@ -5,6 +5,14 @@ export class CreateProjectDto {
   @IsNotEmpty({ message: 'Project name is required' })
   name: string;
 
+  @IsString()
+  @IsOptional()
+  description: string
+
+  @IsArray()
+  @IsOptional()
+  tasks: string[];
+
   @IsArray()
   @IsOptional()
   memberIds: string[];
@@ -14,6 +22,18 @@ export class UpdateProjectDto {
   @IsString()
   @IsNotEmpty({ message: 'Project name is required' })
   name: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsArray()
+  @IsOptional()
+  memberIds: string[];  
+
+  @IsArray()
+  @IsOptional()
+  tasks: Task[];
 }
 
 export class AddMemberToProjectDto {
@@ -40,4 +60,9 @@ export class UpdateTaskDto {
   @IsString()
   @IsNotEmpty({ message: 'Task name is required' })
   name: string;
+}
+
+export interface Task {
+  id: string
+  name: string
 }

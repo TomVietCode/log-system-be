@@ -37,9 +37,11 @@ model WhiteListEmail {
   @@map("white_list_emails")
 }
 
+
 model Project {
   id             String           @id @default(uuid())
   name           String           @db.VarChar(255)
+  description    String           @db.VarChar(255)
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   DevLog         DevLog[]
