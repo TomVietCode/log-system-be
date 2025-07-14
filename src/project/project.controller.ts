@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   ExecutionContext,
   Get,
   Param,
@@ -76,19 +77,6 @@ export class ProjectController {
     };
   }
 
-  @Patch('tasks/:taskId')
-  @Roles(UserRole.LEADER)
-  async updateTask(
-    @Param('taskId') taskId: string,
-    @Body() dto: UpdateTaskDto,
-  ) {
-    const result = await this.projectService.updateTask(taskId, dto);
-
-    return {
-      data: result,
-    };
-  }
-
   @Get(':projectId')
   @Roles(UserRole.LEADER, UserRole.DEV)
   async getProject(@Param('projectId') projectId: string) {
@@ -111,6 +99,16 @@ export class ProjectController {
       userId,
       dto,
     );
+
+    return {
+      data: result,
+    };
+  }
+
+  @Delete(':projectId') 
+  @Roles(UserRole.LEADER)
+  async deleteProject(@Param('projectId') projectId: string) {
+    const result = await this.projectService.deleteProject(projectId);
 
     return {
       data: result,

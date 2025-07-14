@@ -11,7 +11,7 @@ export class CreateProjectDto {
 
   @IsArray()
   @IsOptional()
-  tasks: string[];
+  tasks: Task[];
 
   @IsArray()
   @IsOptional()

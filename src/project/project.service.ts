@@ -44,7 +44,7 @@ export class ProjectService {
       }
     })
 
-    const projectTask = dto.tasks.map(name => ({ id: v7(), projectId, name }))
+    const projectTask = dto.tasks.map(task => ({ id: v7(), projectId, name: task.name }))
     await this.prisma.task.createMany({ data: projectTask })
     
     return { ...project, members }
@@ -273,14 +273,24 @@ export class ProjectService {
     return true
   }
 
-  async updateTask(taskId: string, dto: UpdateTaskDto) {
-    const { name } = dto
+  async deleteProject(projectId: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // Delete all tasks associated with the project
+      await tx.task.deleteMany({
+        where: { projectId }
+      })
 
-    const task = await this.prisma.task.update({
-      where: { id: taskId },
-      data: { name, updatedAt: new Date() } 
+      // Delete all project member relationships
+      await tx.projectMembers.deleteMany({
+        where: { projectId }
+      })
+
+      // Delete the project itself
+      await tx.project.delete({
+        where: { id: projectId }
+      })
+      
+      return true
     })
-
-    return task
   }
 }
