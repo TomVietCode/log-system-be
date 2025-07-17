@@ -1,4 +1,4 @@
-import { BadRequestException, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto, createTaskDto, Task, UpdateProjectDto, UpdateTaskDto } from './dtos';
 import { v7 } from 'uuid';
@@ -73,7 +73,6 @@ export class ProjectService {
         },
       }
     })
-    console.log(userId)
     return projects
   }
 

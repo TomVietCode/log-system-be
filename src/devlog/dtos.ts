@@ -3,11 +3,16 @@ import { IsBoolean, IsDate, IsNotEmpty, IsOptional, IsString, IsUUID, ValidateBy
 
 export class CreateDevLogDto {
   @IsString()
-  @IsNotEmpty()
-  @IsUUID('7', { message: "Invalid ID" })
+  @IsUUID('7', { message: "Invalid Project ID" })
+  @IsNotEmpty({ message: "Project is required" })
+  projectId: string
+
+  @IsString()
+  @IsUUID('7', { message: "Invalid Task ID" })
+  @IsNotEmpty({ message: "Task is required" })
   taskId: string
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Total hour is required" })
   @Transform(({ value }) => Number(value))
   totalHour: number
 

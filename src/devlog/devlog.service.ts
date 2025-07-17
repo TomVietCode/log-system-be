@@ -28,14 +28,23 @@ export class DevlogService {
     const isExist = await this.prisma.devLog.findFirst({
       where: {
         taskId,
-        logDate,
-        userId: user.id
+        userId: user.id,
+        logDate
       }
     })
 
     if (isExist) {
-      throw new BadRequestException('Dev log already exists')
+      await this.prisma.devLog.update({
+        where: {
+          id: isExist.id
+        },
+        data: {
+          totalHour: totalHour + isExist.totalHour
+        }
+      })
+      return isExist
     }
+
     const newId = v7()
     const devLog = await this.prisma.devLog.create({
       data: {
