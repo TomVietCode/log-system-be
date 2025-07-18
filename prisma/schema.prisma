@@ -82,7 +82,7 @@ model DevLog {
   userId     String   @map("user_id")
   projectId  String   @map("project_id")
   taskId     String   @map("task_id")
-  totalHour  Int      @default(0) @map("total_hour")
+  totalHour  Float      @default(0) @map("total_hour")
   content    String   @db.VarChar(255)
   logDate    DateTime @default(now()) @map("log_date")
   isOvertime Boolean  @default(false) @map("is_overtime")

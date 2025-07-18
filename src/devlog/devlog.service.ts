@@ -14,7 +14,7 @@ export class DevlogService {
 
   async createDevLog(user: User, dto: CreateDevLogDto) {
     const { taskId, totalHour, isOvertime, content, logDate } = dto
-
+    
     const task = await this.prisma.task.findUnique({
       where: {
         id: taskId

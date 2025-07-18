@@ -30,9 +30,7 @@ export class DevlogController {
   async getMyDevLogs(
     @UserDecorator() user: User, 
     @Query("month") month: number, 
-    @Query("year") year: number,
-    @Query("page") page: number,
-    @Query("limit") limit: number
+    @Query("year") year: number
   ) {
     const result = await this.devlogService.getMyDevLogs(user, month, year)
 
