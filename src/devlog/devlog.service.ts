@@ -61,6 +61,16 @@ export class DevlogService {
       }
     })
 
+    // Update DevLog Date
+    await this.prisma.projectMembers.updateMany({
+      where: {
+        userId: user.id,
+      },
+      data: {
+        logDate: new Date()
+      }
+    })
+
     return devLog
   }
 
@@ -78,6 +88,9 @@ export class DevlogService {
     })
     const projectIds = joinedProjects.map(project => project.projectId)
     
+    if (joinedProjects.length === 0) {
+      throw new BadRequestException('User is not a member of any project')
+    }
     // Get all tasks of all projects
     const tasks = await this.prisma.task.findMany({
       where: {

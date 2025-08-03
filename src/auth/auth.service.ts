@@ -83,11 +83,16 @@ export class AuthService {
   }
 
   async validateWhiteListEmail(email: string) {
-    const isEmailInWhiteList = await this.prismaService.whiteListEmail.findFirst({
-      where: { email },
+    // Extract domain from email
+    const emailDomain = email.split('@')[1];
+    
+    // Check if the exact email is in whitelist
+    const emailMatch = await this.prismaService.whiteListEmail.findFirst({
+      where: { OR: [{ email }, { domain: emailDomain }] },
     });
-
-    if (!isEmailInWhiteList) {
+    
+    // If neither the exact email nor the domain is in the whitelist
+    if (!emailMatch) {
       throw new BadRequestException('Email is not in the white list');
     }
   }

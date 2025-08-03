@@ -124,4 +124,14 @@ export class ProjectController {
       data: result,
     };
   }
+
+  @Get(':projectId/members')
+  @Roles(UserRole.LEADER, UserRole.DEV)
+  async getProjectMembers(@Param('projectId') projectId: string) {
+    const result = await this.projectService.getProjectMembers(projectId);
+
+    return {
+      data: result,
+    };
+  }
 }

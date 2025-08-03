@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto, createTaskDto, Task, UpdateProjectDto, UpdateTaskDto } from './dtos';
 import { v7 } from 'uuid';
+import { getDayRange } from 'src/helper/date';
 
 @Injectable()
 export class ProjectService {
@@ -71,9 +72,38 @@ export class ProjectService {
             ProjectMembers: true
           } 
         },
+        ProjectMembers: {
+          select: {
+            logDate: true,
+            user: {
+              select: {
+                id: true,
+                employeeCode: true,
+                fullName: true,
+                role: true
+              }
+            }
+          }
+        }
       }
     })
-    return projects
+
+    const response = projects.map(project => {
+      const members = project.ProjectMembers.map(member => {
+        const { logDate, user } = member
+        return {
+          ...user,
+          logDate
+        }
+      })
+      const { ProjectMembers, ...rest } = project
+      return {
+        ...rest,
+        members
+      }
+    })
+
+    return response
   }
 
   async addMemberToProject(projectId: string, memberIds: string[]) {
@@ -166,7 +196,7 @@ export class ProjectService {
         },
         ProjectMembers: {
           select: {
-            userId: true
+            user: true
           }
         }
       }
@@ -291,5 +321,27 @@ export class ProjectService {
       
       return true
     })
+  }
+
+  async getProjectMembers(projectId: string) {
+    const todayDate = (new Date()).toISOString().split('T')[0];
+    const { startOfDay, endOfDay } = getDayRange(todayDate)
+
+    const data = await this.prisma.projectMembers.findMany({
+      where: { projectId },
+      select: {
+        user: {
+          select: {
+            id: true,
+            employeeCode: true,
+            fullName: true,
+            role: true
+          }
+        }
+      }
+    })
+
+    const members = data.map(member => member.user)
+    return members
   }
 }
