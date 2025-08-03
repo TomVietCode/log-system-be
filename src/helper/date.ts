@@ -24,3 +24,11 @@ export const getDayRange = (date: string) => {
     endOfDay
   }
 }
+
+export const getCurrentDate = () => {
+  const currentDate = new Date()
+  return {
+    currentMonth: currentDate.getMonth() + 1,
+    currentYear: currentDate.getFullYear()
+  }
+}

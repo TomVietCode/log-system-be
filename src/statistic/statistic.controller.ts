@@ -12,8 +12,8 @@ export class StatisticController {
   ) {}
 
   @Get("dashboard")
-  async getDashboardData(@UserDecorator() user: User, @Query("month") month: number, @Query("year") year: number) {
-    const result = await this.statisticService.getDashboardData(user, month, year)
+  async getDashboardData(@UserDecorator() user: User) {
+    const result = await this.statisticService.getDashboardData(user)
 
     return {
       data: result
