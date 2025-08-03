@@ -76,13 +76,16 @@ export class DevlogController {
 
   @Get(":userId")
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.HCNS, UserRole.LEADER)
   async getUserDevLogs(
     @UserDecorator() requester: User, 
     @Param("userId") userId: string, 
     @Query("month") month: number, 
     @Query("year") year: number
   ) {
+    if(requester.role === UserRole.DEV) {
+      userId = requester.id
+    }
+
     const result = await this.devlogService.getUserDevLogs(requester, userId, month, year)
 
     return {
