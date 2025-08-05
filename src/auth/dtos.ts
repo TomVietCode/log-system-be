@@ -29,6 +29,10 @@ export class RegisterDTO {
   @IsNotEmpty({ message: 'Phone number is required' })
   @IsPhoneNumber('VN', { message: 'Phone number must be a valid Vietnamese phone number' })
   phone: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Role is required' })
+  role: UserRole;
 }
 
 export class LoginDTO {

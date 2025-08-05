@@ -66,7 +66,10 @@ export class ChangePasswordDto {
 // dto update user for admin only
 export class UpdateUserAdminDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string
+
+  @IsString()
   role?: UserRole
 
   @IsString()

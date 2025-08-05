@@ -37,7 +37,7 @@ export class AuthService {
           id,
           email: registerDto.email,
           password: hashedPassword,
-          role: UserRole.DEV,
+          role: registerDto.role,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

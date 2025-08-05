@@ -242,12 +242,6 @@ export class DevlogService {
     }
   }
 
-  async exportDevLogs(requester: User, userId: string, month: number, year: number) {
-    const data = await this.getUserDevLogs(requester, userId, month, year)
-    
-    return data
-  }
-
   async getUserDevLogs(requester: User, userId: string, month: number, year: number) {
     const { role, id: requesterId } = requester
 
@@ -308,5 +302,21 @@ export class DevlogService {
 
     const devLogData = await this.getMyDevLogs(user, month, year)
     return devLogData
+  }
+
+  combineExportedCsvs(csvDataArray: string[]): string {
+    if (csvDataArray.length === 0) return '';
+    
+    // First CSV with headers
+    const result = [csvDataArray[0]];
+    
+    // Add remaining CSVs without headers
+    for (let i = 1; i < csvDataArray.length; i++) {
+      const csvLines = csvDataArray[i].split('\n');
+      // Skip header line and add the rest
+      result.push(...csvLines.slice(1));
+    }
+    
+    return result.join('\n');
   }
 }

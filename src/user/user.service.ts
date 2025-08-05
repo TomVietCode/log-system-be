@@ -50,12 +50,12 @@ export class UserService {
       delete dto.password
     }
 
-    await this.prisma.user.update({
+    const result = await this.prisma.user.update({
       where: { id: userId},
       data: dto
     })
 
-    return true
+    return result
   }
 
   async getProfile(userId: string) {

@@ -50,28 +50,35 @@ export class DevlogController {
     }
   }
 
-  @Get("export")
+  @Post("export")
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN, UserRole.HCNS)
   async exportDevLogs(
     @UserDecorator() requester: User,
-    @Query("userId") userId: string,
-    @Query("month") month: number,
-    @Query("year") year: number,
+    @Body("userIds") userIds: string[],
+    @Body("month") month: number,
+    @Body("year") year: number,
     @Res() res: Response
   ) {
     month = Number(month)
     year = Number(year)
 
-    const devLogsData = await this.devlogService.getUserDevLogs(requester, userId, month, year)
-    const csvString = generateDevLogCsv(devLogsData as devLogData)
-    const fileName = `logs-${devLogsData.userName}-${month}-${year}.csv`
+    const results = await Promise.all(
+      userIds.map(async (userId) => {
+        const devLogsData = await this.devlogService.getUserDevLogs(requester, userId, month, year)
+        const csvString = generateDevLogCsv(devLogsData as devLogData)
+        return csvString
+      })
+    )
+
+    const combinedCsv = this.devlogService.combineExportedCsvs(results)
+    const fileName = `devlogs_${month}_${year}.csv`
 
     // set header and download
     res.setHeader('Content-Type', 'text/csv')
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`)
 
-    res.send(csvString)
+    res.send(combinedCsv)
   }
 
   @Get(":userId")
