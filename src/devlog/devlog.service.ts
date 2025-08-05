@@ -65,6 +65,7 @@ export class DevlogService {
     await this.prisma.projectMembers.updateMany({
       where: {
         userId: user.id,
+        projectId: task.projectId
       },
       data: {
         logDate: new Date()

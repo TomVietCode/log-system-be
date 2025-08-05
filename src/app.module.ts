@@ -9,9 +9,10 @@ import { DevlogModule } from './devlog/devlog.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JWTAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StatisticModule } from './statistic/statistic.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, AuthModule, ProjectModule, DevlogModule, StatisticModule],
+  imports: [PrismaModule, UserModule, AuthModule, ProjectModule, DevlogModule, StatisticModule, NotificationModule],
   controllers: [AppController],
   providers: [
     AppService, 
