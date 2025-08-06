@@ -196,13 +196,29 @@ export class ProjectService {
         },
         ProjectMembers: {
           select: {
-            user: true
+            user: {
+              select: {
+                id: true,
+                employeeCode: true,
+                fullName: true,
+                role: true
+              }
+            }
           }
         }
       }
     })
 
-    return project
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const { ProjectMembers, ...rest } = project;
+    const response = {
+      ...rest,
+      members: ProjectMembers.map(member => member.user)
+    }
+    return response
   }
 
   async updateTasks(projectId: string, tasks: Task[]) {
