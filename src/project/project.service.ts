@@ -140,37 +140,51 @@ export class ProjectService {
     return { success: true }
   }
 
-  async createProjectTask(dto: createTaskDto) {
-    const { name, projectId } = dto
-
+  async createProjectTasks(projectId: string, dto: createTaskDto[]) {
     // Check if project exists
+    if (dto.length === 0) {
+      return [];
+    }
+
     const project = await this.prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
       throw new NotFoundException('Project not found')
     }
     
-    // Check if task name is exists
-    const existingTask = await this.prisma.task.findFirst({
-      where: { name, projectId }
+    // Check if any task names already exist
+    const taskNames = dto.map(task => task.name);
+    const existingTasks = await this.prisma.task.findMany({
+      where: { 
+        name: { in: taskNames },
+        projectId 
+      }
     })
 
-    if (existingTask) {
-      throw new BadRequestException('Task with this name already exists')
+    if (existingTasks.length > 0) {
+      const existingNames = existingTasks.map(task => task.name).join(', ');
+      throw new BadRequestException(`Tasks with these names already exist: ${existingNames}`)
     }
 
-    // Create task
-    const taskId = v7()
-    const task = await this.prisma.task.create({
-      data: {
-        id: taskId,
+    // Create tasks
+    const tasks = await this.prisma.task.createMany({
+      data: dto.map(task => ({
+        id: v7(),
         projectId,
-        name,
+        name: task.name,
         createdAt: new Date(),
         updatedAt: new Date()
-      }
-    })  
+      }))
+    })
 
-    return task
+    // Return created tasks
+    const createdTasks = await this.prisma.task.findMany({
+      where: {
+        name: { in: taskNames },
+        projectId
+      }
+    })
+
+    return createdTasks;
   }
 
   async getProjectTasks(projectId: string) {

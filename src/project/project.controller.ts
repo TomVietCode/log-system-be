@@ -67,15 +67,6 @@ export class ProjectController {
     };
   }
 
-  @Post('tasks')
-  @Roles(UserRole.LEADER, UserRole.DEV)
-  async createProjectTask(@Body() dto: createTaskDto) {
-    const result = await this.projectService.createProjectTask(dto);
-
-    return {
-      data: result,
-    };
-  }
 
   @Get(':projectId')
   @Roles(UserRole.LEADER, UserRole.DEV)
@@ -109,6 +100,16 @@ export class ProjectController {
   @Roles(UserRole.LEADER)
   async deleteProject(@Param('projectId') projectId: string) {
     const result = await this.projectService.deleteProject(projectId);
+
+    return {
+      data: result,
+    };
+  }
+
+  @Post(':projectId/tasks')
+  @Roles(UserRole.LEADER, UserRole.DEV)
+  async createProjectTasks(@Param('projectId') projectId: string, @Body() dto: createTaskDto[]) {
+    const result = await this.projectService.createProjectTasks(projectId, dto);
 
     return {
       data: result,
