@@ -319,7 +319,7 @@ export class ProjectService {
   }
 
   async deleteProject(projectId: string) {
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       // Delete all tasks associated with the project
       await tx.task.deleteMany({
         where: { projectId }
