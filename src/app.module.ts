@@ -10,9 +10,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { JWTAuthGuard } from './auth/guards/jwt-auth.guard';
 import { StatisticModule } from './statistic/statistic.module';
 import { NotificationModule } from './notification/notification.module';
+import { WhitelistModule } from './whitelist/whitelist.module';
 
 @Module({
-  imports: [PrismaModule, UserModule, AuthModule, ProjectModule, DevlogModule, StatisticModule, NotificationModule],
+  imports: [PrismaModule, UserModule, AuthModule, ProjectModule, DevlogModule, StatisticModule, NotificationModule, WhitelistModule],
   controllers: [AppController],
   providers: [
     AppService, 

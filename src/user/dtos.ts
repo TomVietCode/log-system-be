@@ -8,9 +8,9 @@ export interface User {
   dob?: Date | null
   accountNumber?: string | null
   email: string
-  phone: string
-  citizenID: string
-  personalEmail?: string
+  phone?: string | null 
+  citizenID?: string | null
+  personalEmail?: string | null
   licensePlate?: string | null
   role: UserRole
   createdAt?: Date
