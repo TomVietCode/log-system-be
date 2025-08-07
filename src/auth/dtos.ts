@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional, IsDate, IsPhoneNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsPhoneNumber } from 'class-validator';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -22,16 +22,16 @@ export class RegisterDTO {
   password: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Citizen ID is required' })
+  @IsOptional()
   citizenID: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Phone number is required' })
+  @IsOptional()
   @IsPhoneNumber('VN', { message: 'Phone number must be a valid Vietnamese phone number' })
   phone: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Role is required' })
+  @IsOptional()
   role: UserRole;
 }
 
