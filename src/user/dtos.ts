@@ -66,6 +66,7 @@ export class ChangePasswordDto {
 // dto update user for admin only
 export class UpdateUserAdminDto {
   @IsString()
+  @IsEmail({}, { message: 'Email is not valid' })
   @IsNotEmpty({ message: 'Email is required' })
   email: string
 

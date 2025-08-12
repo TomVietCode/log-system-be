@@ -8,30 +8,42 @@ import { UserRole } from 'src/auth/dtos';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUserList(page: number = 1, limit: number = 10, role: string = "all") {
+  async getUserList(page: number = 1, limit: number = 10, role: string = "all", q?: string) {
     const skip = (page - 1) * limit
-    
-    const where = role === "all" 
-      ? {} 
-      : { role: role as UserRole }
 
-    const users = await this.prisma.user.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: {
-        createdAt: "desc"
-      },
-      select: {
-        id: true,
-        employeeCode: true,
-        fullName: true,
-        role: true,
-        email: true,
-      }
-    })
+    const baseWhere = role === "all" ? {} : { role: role as UserRole }
 
-    return users
+    // Accent-insensitive search by using mode: 'insensitive' and OR on fields
+    const queryWhere = q
+      ? {
+          OR: [
+            { fullName: { contains: q } },
+            { email: { contains: q } },
+            { employeeCode: { contains: q } },
+          ],
+        }
+      : {}
+
+    const where = { ...baseWhere, ...queryWhere }
+
+    const [users, total] = await this.prisma.$transaction([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          employeeCode: true,
+          fullName: true,
+          role: true,
+          email: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ])
+
+    return { users, total }
   }
 
   async updateUser(userId: string, dto: UpdateUserAdminDto) {
@@ -44,6 +56,20 @@ export class UserService {
       throw new NotFoundException("User not found")
     }
     
+    // Check if email exists
+    if (dto.email) {
+      const existingEmail = await this.prisma.user.findFirst({
+        where: { email: dto.email, id: { not: userId } }
+      });
+      
+      if (existingEmail) {
+        throw new BadRequestException("Email already exists");
+      }
+      
+      // Validate whitelist email if email is being updated
+      await this.validateWhiteListEmail(dto.email);
+    }
+    
     if(dto.password && dto.password.length > 0) {
       dto.password = await bcrypt.hash(dto.password, 10)
     } else {
@@ -51,11 +77,26 @@ export class UserService {
     }
 
     const result = await this.prisma.user.update({
-      where: { id: userId},
+      where: { id: userId },
       data: dto
     })
 
     return result
+  }
+  
+  async validateWhiteListEmail(email: string) {
+    // Extract domain from email
+    const emailDomain = email.split('@')[1];
+    
+    // Check if the exact email or domain is in whitelist
+    const emailMatch = await this.prisma.whiteListEmail.findFirst({
+      where: { OR: [{ email }, { domain: emailDomain }] },
+    });
+    
+    // If neither the exact email nor the domain is in the whitelist
+    if (!emailMatch) {
+      throw new BadRequestException('Email is not in the white list');
+    }
   }
 
   async getProfile(userId: string) {

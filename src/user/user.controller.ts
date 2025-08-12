@@ -17,10 +17,15 @@ export class UserController {
   @Get()
   @UseGuards(RoleGuard)
   @Roles(UserRole.HCNS, UserRole.ADMIN, UserRole.LEADER)
-  async getUserList(@Query("page") page: number, @Query("limit") limit: number, @Query("role") role: string) {
+  async getUserList(
+    @Query("page") page: number,
+    @Query("limit") limit: number,
+    @Query("role") role: string,
+    @Query("q") q?: string,
+  ) {
     page = Number(page) || 1
     limit = Number(limit) || 10
-    const result = await this.userService.getUserList(page, limit, role)
+    const result = await this.userService.getUserList(page, limit, role, q)
 
     return {
       data: result

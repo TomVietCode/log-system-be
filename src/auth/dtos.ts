@@ -27,7 +27,6 @@ export class RegisterDTO {
 
   @IsString()
   @IsOptional()
-  @IsPhoneNumber('VN', { message: 'Phone number must be a valid Vietnamese phone number' })
   phone: string;
 
   @IsString()
