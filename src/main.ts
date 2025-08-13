@@ -8,6 +8,7 @@ async function bootstrap() {
 
   // Enable cookie parser
   app.use(cookieParser());
+  
   // add prefix to all routes
   app.setGlobalPrefix("api")
 
@@ -19,7 +20,7 @@ async function bootstrap() {
 
   // add cors
   app.enableCors({  
-    origin: process.env.FRONTEND_URL,
+    origin: [process.env.FRONTEND_URL, 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

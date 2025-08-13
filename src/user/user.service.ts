@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ChangePasswordDto, UpdateUserAdminDto, UpdateUserDto } from './dtos';
+import { ChangePasswordDto, CreateUserDTO, UpdateUserAdminDto, UpdateUserDto } from './dtos';
 import * as bcrypt from 'bcrypt'
 import { UserRole } from 'src/auth/dtos';
+import { generateEmployeeCode } from 'src/helper/generate';
 
 @Injectable()
 export class UserService {
@@ -83,21 +84,6 @@ export class UserService {
 
     return result
   }
-  
-  async validateWhiteListEmail(email: string) {
-    // Extract domain from email
-    const emailDomain = email.split('@')[1];
-    
-    // Check if the exact email or domain is in whitelist
-    const emailMatch = await this.prisma.whiteListEmail.findFirst({
-      where: { OR: [{ email }, { domain: emailDomain }] },
-    });
-    
-    // If neither the exact email nor the domain is in the whitelist
-    if (!emailMatch) {
-      throw new BadRequestException('Email is not in the white list');
-    }
-  }
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -175,5 +161,58 @@ export class UserService {
     })
 
     return true
+  }
+
+  async createUser(dto: CreateUserDTO) {
+    try {
+      const { email, password, fullName, citizenID, phone, role } = dto
+      await this.validateWhiteListEmail(email);
+
+      const existedEmail = await this.prisma.user.findFirst({
+        where: { email },
+      });
+
+      if (existedEmail) {
+        throw new BadRequestException('Email already exists');
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = await this.prisma.user.create({
+        data: {
+          ...dto,
+          employeeCode: generateEmployeeCode(4),
+          personalEmail: email,
+          email,
+          password: hashedPassword,
+          role: role || UserRole.DEV,
+          phone,
+          citizenID,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+
+      const { password: _, ...props } = newUser
+      return props
+
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async validateWhiteListEmail(email: string) {
+    // Extract domain from email
+    const emailDomain = email.split('@')[1];
+    
+    // Check if the exact email or domain is in whitelist
+    const emailMatch = await this.prisma.whiteListEmail.findFirst({
+      where: { OR: [{ email }, { domain: emailDomain }] },
+    });
+    
+    // If neither the exact email nor the domain is in the whitelist
+    if (!emailMatch) {
+      throw new BadRequestException('Email is not in the white list');
+    }
   }
 }

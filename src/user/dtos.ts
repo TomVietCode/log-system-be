@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
 import { UserRole } from 'src/auth/dtos';
 
 export interface User {
@@ -76,4 +76,32 @@ export class UpdateUserAdminDto {
   @IsString()
   @IsOptional()
   password?: string
+}
+
+export class CreateUserDTO {
+  @IsString()
+  @IsNotEmpty({ message: 'Full name is required' })
+  fullName: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsEmail({}, { message: 'Email is not valid' })
+  email: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Password is required' })
+  password: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Citizen ID is required' })
+  citizenID: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Phone is required' })
+  phone: string;
+
+  @IsString()
+  @IsEnum(UserRole, { message: 'Invalid role' })
+  @IsNotEmpty({ message: 'Role is required' })
+  role: UserRole;
 }

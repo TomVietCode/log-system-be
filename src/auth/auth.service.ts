@@ -73,12 +73,10 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new BadRequestException('Invalid password');
       }
-
       const accessToken = this.jwtService.sign({
         sub: user.id,
         role: user.role,
       })
-
       const { password, ...props } = user
       return { accessToken, user: props };
     } catch (error) {
