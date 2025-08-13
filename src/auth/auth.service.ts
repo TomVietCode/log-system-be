@@ -50,7 +50,8 @@ export class AuthService {
         role: user.role,
       })
 
-      return { accessToken };
+      const { password, ...props } = user
+      return { accessToken, user: props };
 
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -78,7 +79,8 @@ export class AuthService {
         role: user.role,
       })
 
-      return { accessToken };
+      const { password, ...props } = user
+      return { accessToken, user: props };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
