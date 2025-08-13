@@ -47,6 +47,25 @@ export class UserService {
     return { users, total }
   }
 
+  async getDevList() {
+    try {
+      const result = await this.prisma.user.findMany({
+        where: { role: UserRole.DEV },
+        select: {
+          id: true,
+          employeeCode: true,
+          fullName: true,
+          role: true,
+          email: true,
+        },
+      })
+
+      return result
+    } catch (error) {
+      throw new BadRequestException(error.message)
+    }
+  }
+
   async updateUser(userId: string, dto: UpdateUserAdminDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

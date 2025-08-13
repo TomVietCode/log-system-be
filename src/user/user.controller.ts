@@ -32,6 +32,17 @@ export class UserController {
     }
   }
   
+  @Get('/dev')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.LEADER)
+  async getDevList() {
+    const result = await this.userService.getDevList()
+
+    return {
+      data: result
+    }
+  }
+
   @Get("profile")
   async getProfile(@UserDecorator("id") userId: string) {
     const result = await this.userService.getProfile(userId)
