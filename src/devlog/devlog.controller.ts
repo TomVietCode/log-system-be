@@ -83,6 +83,7 @@ export class DevlogController {
 
   @Get(":userId")
   @UseGuards(RoleGuard)
+  @Roles(UserRole.LEADER, UserRole.DEV, UserRole.HCNS)
   async getUserDevLogs(
     @UserDecorator() requester: User, 
     @Param("userId") userId: string, 

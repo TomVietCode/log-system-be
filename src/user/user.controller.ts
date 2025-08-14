@@ -34,7 +34,7 @@ export class UserController {
   
   @Get('/dev')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.LEADER)
+  @Roles(UserRole.LEADER, UserRole.HCNS)
   async getDevList() {
     const result = await this.userService.getDevList()
 

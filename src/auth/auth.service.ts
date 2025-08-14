@@ -45,13 +45,7 @@ export class AuthService {
         },
       });
 
-      const accessToken = this.jwtService.sign({
-        sub: user.id,
-        role: user.role,
-      })
-
-      const { password, ...props } = user
-      return { accessToken, user: props };
+      return true
 
     } catch (error) {
       throw new BadRequestException(error.message);
