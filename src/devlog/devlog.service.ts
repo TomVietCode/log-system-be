@@ -5,6 +5,8 @@ import { v7 } from 'uuid';
 import { getDateRange, getDayRange } from 'src/helper/date';
 import { User } from 'src/user/dtos';
 import { UserRole } from 'src/auth/dtos';
+import * as moment from 'moment';
+import { generateDevLogCsv } from 'src/helper/csv';
 
 @Injectable()
 export class DevlogService {
@@ -302,6 +304,60 @@ export class DevlogService {
 
     const devLogData = await this.getMyDevLogs(user, month, year)
     return devLogData
+  }
+
+  async exportDevLogs(requester: User, userIds: string[]) {
+    const data = await this.prisma.devLog.findMany({
+      where: { userId: { in: userIds } },
+      select: {
+        user: {
+          select: {
+            fullName: true,
+            employeeCode: true,
+            role: true,
+            email: true
+          }
+        },
+        project: {
+          select: {
+            name: true
+          }
+        },
+        task: {
+          select: {
+            name: true
+          }
+        },
+        totalHour: true,
+        content: true,
+        logDate: true,
+        isOvertime: true
+      },
+      orderBy: {
+        logDate: 'desc'
+      }
+    })
+
+    const formattedData = data.map(log => {
+      const { user, project, task, ...rest } = log 
+
+      return {
+        ...rest,
+        employeeCode: user.employeeCode,
+        fullName: user.fullName,
+        role: user.role,
+        email: user.email,
+        project: project.name,
+        task: task.name,
+        totalHour: rest.totalHour.toString(),
+        logDate: moment(rest.logDate).format('DD/MM/YYYY HH:mm'),
+        idOvertime: rest.isOvertime ? "Yes" : "No"
+      }
+    })
+
+    const csvString = generateDevLogCsv(formattedData)
+
+    return csvString
   }
 
   combineExportedCsvs(csvDataArray: string[]): string {

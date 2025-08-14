@@ -1,56 +1,57 @@
 import { stringify } from "csv-stringify/sync"
 
-export interface devLogData {
-  userName: string
-  month: number
-  year: number
-  days: number[]
-  tasks: {
-    taskId: string,
-    taskName: string
-    projectId: string,
-    hoursByDay: number[]
-    totalHoursByTask: number
-  }[]
-  totalByDay: number[]
-  grandTotal: number
+export interface FlatDevRow {
+  employeeCode: string,
+  fullName: string,
+  role: string,
+  email: string,
+  project: string,
+  task: string,
+  totalHour: string,
+  content: string,
+  logDate: string,
+  idOvertime: string | boolean
 }
 
-export const generateDevLogCsv = (data: devLogData) => {
-  const { userName, month, year, days, tasks, totalByDay, grandTotal } = data
-
-  const csvData: (string | number)[][] = []
-
-  // Header
-  const headerRow = [
-    `${userName}`,
-    ...days.map(day => `${day}/${month.toString().length === 1 ? `0${month}` : month}`),
-    'Tổng'
+export const generateDevLogCsv = (rows: FlatDevRow[], addBom = true) => {
+  const header = [
+    'Employee Code',
+    'Full Name',
+    'Role',
+    'Email',
+    'Project',
+    'Task',
+    'Hour',
+    'Note',
+    'Date',
+    'Overtime'
   ]
-  csvData.push(headerRow)
 
-  // Tasks
-  for(const task of tasks) {
-    const taskRow = [
-      task.taskName,
-      ...task.hoursByDay,
-      task.totalHoursByTask
-    ]
-    csvData.push(taskRow)
-  }
-
-  // Total row
-  const totalRow = [
-    '',
-    ...totalByDay,
-    grandTotal
+  const data: (string | number | boolean)[][] = [
+    header,
+    ...rows.map(r => ([
+      String(r.employeeCode).trim(),
+      String(r.fullName).trim(),
+      String(r.role).trim(),
+      String(r.email).trim(),
+      String(r.project).trim(),
+      String(r.task).trim(),
+      String(r.totalHour).trim(),
+      String(r.content).trim(),
+      String(r.logDate).trim(),
+      String(r.idOvertime).trim()
+    ]))
   ]
-  csvData.push(totalRow)
 
-  return stringify(csvData, {
+  const csv = stringify(data, { 
     delimiter: ',',
     quote: '"',
     quoted_empty: false,
-    escape: '"'
-  });
+    escape: '"',
+    record_delimiter: '\n',
+    quoted_string: true,
+    quoted: true
+  })
+
+  return addBom ? '\ufeff' + csv : csv
 }

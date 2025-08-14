@@ -27,7 +27,7 @@ export class UserService {
 
     const where = { ...baseWhere, ...queryWhere }
 
-    const [users, total] = await this.prisma.$transaction([
+    const [users, total, userIdsHasDevLog] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         where,
         skip,
@@ -42,9 +42,23 @@ export class UserService {
         },
       }),
       this.prisma.user.count({ where }),
+      this.prisma.devLog.findMany({
+        distinct: ['userId'],
+        select: {
+          userId: true
+        }
+      })
     ])
+    
+    const newUserList = users.map(user => {
+      const isHasDevLog = userIdsHasDevLog.find(id => id.userId === user.id) ? true : false
 
-    return { users, total }
+      return {
+        ...user,
+        isHasDevLog
+      }
+    })
+    return { users: newUserList, total }
   }
 
   async getDevList() {

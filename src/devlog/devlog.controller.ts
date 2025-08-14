@@ -7,7 +7,6 @@ import { User } from 'src/user/dtos';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserRole } from 'src/auth/dtos';
 import { RoleGuard } from 'src/auth/guards/role.guard';
-import { devLogData, generateDevLogCsv } from 'src/helper/csv';
 import { Response } from 'express';
 
 @Controller('devlogs')
@@ -56,29 +55,14 @@ export class DevlogController {
   async exportDevLogs(
     @UserDecorator() requester: User,
     @Body("userIds") userIds: string[],
-    @Body("month") month: number,
-    @Body("year") year: number,
     @Res() res: Response
-  ) {
-    month = Number(month)
-    year = Number(year)
-
-    const results = await Promise.all(
-      userIds.map(async (userId) => {
-        const devLogsData = await this.devlogService.getUserDevLogs(requester, userId, month, year)
-        const csvString = generateDevLogCsv(devLogsData as devLogData)
-        return csvString
-      })
-    )
-
-    const combinedCsv = this.devlogService.combineExportedCsvs(results)
-    const fileName = `devlogs_${month}_${year}.csv`
-
-    // set header and download
-    res.setHeader('Content-Type', 'text/csv')
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`)
-
-    res.send(combinedCsv)
+  ) {    
+    const result = await this.devlogService.exportDevLogs(requester, userIds)
+    
+    const fileName = 'devlog_data.csv'
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8')
+    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`)
+    res.send(result)
   }
 
   @Get(":userId")
