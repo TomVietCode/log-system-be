@@ -3,36 +3,36 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model User {
   id             String           @id @default(uuid())
-  employeeCode   String           @map("employee_code") @db.VarChar(5)
-  fullName       String           @map("full_name") @db.VarChar(255)
-  dob            DateTime?        @db.Date
-  accountNumber  String?          @map("account_number") @db.VarChar(50)
-  email          String           @db.VarChar(255)
-  password       String           @db.VarChar(255)
-  phone          String?          @db.VarChar(20)
-  citizenID      String?          @map("citizen_id") @db.VarChar(50)
-  personalEmail  String           @map("personal_email") @db.VarChar(255)
-  licensePlate   String?          @map("license_plate") @db.VarChar(20)
+  employeeCode   String           @map("employee_code") 
+  fullName       String           @map("full_name")
+  dob            DateTime?        
+  accountNumber  String?          @map("account_number") 
+  email          String           
+  password       String           
+  phone          String?          
+  citizenID      String?          @map("citizen_id")
+  personalEmail  String           @map("personal_email") 
+  licensePlate   String?          @map("license_plate") 
   role           Role             @default(DEV) @map("role")
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   DevLog         DevLog[]
   ProjectMembers ProjectMembers[]
+  Notification Notification[]
 
   @@map("users")
-  Notification Notification[]
 }
 
 model WhiteListEmail {
   id        String   @id @default(uuid())
-  email     String   @db.VarChar(255)
-  domain    String?  @db.VarChar(100)
+  email     String   
+  domain    String?  
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -42,8 +42,8 @@ model WhiteListEmail {
 
 model Project {
   id             String           @id @default(uuid())
-  name           String           @db.VarChar(255)
-  description    String           @db.VarChar(255)
+  name           String           
+  description    String           
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
   DevLog         DevLog[]
@@ -69,7 +69,7 @@ model ProjectMembers {
 
 model Task {
   id        String   @id @default(uuid())
-  name      String   @db.VarChar(255)
+  name      String   
   projectId String   @map("project_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -86,7 +86,7 @@ model DevLog {
   projectId  String   @map("project_id")
   taskId     String   @map("task_id")
   totalHour  Float      @default(0) @map("total_hour")
-  content    String   @db.VarChar(255)
+  content    String   
   logDate    DateTime @default(now()) @map("log_date")
   isOvertime Boolean  @default(false) @map("is_overtime")
   createdAt  DateTime @default(now()) @map("created_at")
@@ -104,8 +104,8 @@ model DevLog {
 model Notification {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
-  title     String   @db.VarChar(255)
-  content   String   @db.VarChar(255)
+  title     String   
+  content   String   
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id])
