@@ -5,8 +5,6 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Removed cookie parser - now using Authorization header
-
   // add prefix to all routes
   app.setGlobalPrefix('api');
 
@@ -21,11 +19,11 @@ async function bootstrap() {
   // add cors - removed credentials since we're using Authorization header
   app.enableCors({
     origin: ['http://192.168.2.145:3000', 'http://localhost:3000'],
-    credentials: false,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   });
 
-  await app.listen(process.env.PORT ?? 5000, '0.0.0.0');
+  await app.listen(process.env.PORT ?? 5000);
 }
 bootstrap();
