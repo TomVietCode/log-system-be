@@ -5,9 +5,6 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // add prefix to all routes
-  app.setGlobalPrefix('api');
-
   // add validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,7 +15,7 @@ async function bootstrap() {
 
   // add cors - removed credentials since we're using Authorization header
   app.enableCors({
-    origin: ['http://192.168.2.145:3000', 'http://localhost:3000'],
+    origin: ['http://cuongdev.tech', 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
